@@ -2,13 +2,29 @@ print("Engineering Trade-Off Simulator")
 print("This tool evaluates design choices using simplified engineering assumptions\n")
 
 
+def read_number(prompt):
+    while True:
+        try:
+            return float(input(prompt))
+        except ValueError:
+            print("Please enter a number.")
+
+
 print("Enter weighting factors for the evaluation (does not need to add to 1):")
 
-speed_weight = float(input("Speed weight: "))
-torque_weight = float(input("Torque weight: "))
-cost_weight = float(input("Cost weight: "))
+while True:
+    speed_weight = read_number("Speed weight: ")
+    torque_weight = read_number("Torque weight: ")
+    cost_weight = read_number("Cost weight: ")
 
-total_weight = speed_weight + torque_weight + cost_weight
+    total_weight = speed_weight + torque_weight + cost_weight
+
+    if min(speed_weight, torque_weight, cost_weight) < 0:
+        print("Weights cannot be negative. Try again.\n")
+    elif total_weight == 0:
+        print("At least one weight must be greater than 0. Try again.\n")
+    else:
+        break
 
 speed_weight /= total_weight
 torque_weight /= total_weight
@@ -74,14 +90,26 @@ class Design:
 
 def user_input(prompt):
     while True:
-        value = float(input(prompt))
+        value = read_number(prompt)
         if 1 <= value <= 10:
             return value
         print("Please enter a value between 1 and 10.")
 
 
+def read_design_count():
+    while True:
+        try:
+            count = int(input("How many designs would you like to evaluate? "))
+        except ValueError:
+            print("Please enter a whole number.")
+            continue
+        if count >= 1:
+            return count
+        print("Please enter at least 1.")
+
+
 designs = []
-amount_of_designs = int(input("How many designs would you like to evaluate? "))
+amount_of_designs = read_design_count()
 
 for i in range(amount_of_designs):
     print(f"\nDesign {i + 1}")
