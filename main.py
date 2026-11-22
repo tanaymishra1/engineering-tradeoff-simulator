@@ -1,7 +1,3 @@
-print("Engineering Trade-Off Simulator")
-print("This tool evaluates design choices using simplified engineering assumptions\n")
-
-
 def read_number(prompt):
     while True:
         try:
@@ -10,30 +6,24 @@ def read_number(prompt):
             print("Please enter a number.")
 
 
-print("Enter weighting factors for the evaluation (does not need to add to 1):")
+def user_input(prompt):
+    while True:
+        value = read_number(prompt)
+        if 1 <= value <= 10:
+            return value
+        print("Please enter a value between 1 and 10.")
 
-while True:
-    speed_weight = read_number("Speed weight: ")
-    torque_weight = read_number("Torque weight: ")
-    cost_weight = read_number("Cost weight: ")
 
-    total_weight = speed_weight + torque_weight + cost_weight
-
-    if min(speed_weight, torque_weight, cost_weight) < 0:
-        print("Weights cannot be negative. Try again.\n")
-    elif total_weight == 0:
-        print("At least one weight must be greater than 0. Try again.\n")
-    else:
-        break
-
-speed_weight /= total_weight
-torque_weight /= total_weight
-cost_weight /= total_weight
-
-print("\nNormalized Weights Applied:")
-print(f" Speed: {round(speed_weight, 2)}")
-print(f" Torque: {round(torque_weight, 2)}")
-print(f" Cost: {round(cost_weight, 2)}\n")
+def read_design_count():
+    while True:
+        try:
+            count = int(input("How many designs would you like to evaluate? "))
+        except ValueError:
+            print("Please enter a whole number.")
+            continue
+        if count >= 1:
+            return count
+        print("Please enter at least 1.")
 
 
 class Design:
@@ -57,7 +47,7 @@ class Design:
             self.cost * cost_weight
         )
 
-
+        # torque penalty
         if self.torque < 5:
             self.score -= 1
 
@@ -88,26 +78,37 @@ class Design:
         print(f" Design Focus: {self.focus}\n")
 
 
-def user_input(prompt):
-    while True:
-        value = read_number(prompt)
-        if 1 <= value <= 10:
-            return value
-        print("Please enter a value between 1 and 10.")
+print("Engineering Trade-Off Simulator")
+print("This tool evaluates design choices using simplified engineering assumptions\n")
 
+# weights
+print("Enter weighting factors for the evaluation (does not need to add to 1):")
 
-def read_design_count():
-    while True:
-        try:
-            count = int(input("How many designs would you like to evaluate? "))
-        except ValueError:
-            print("Please enter a whole number.")
-            continue
-        if count >= 1:
-            return count
-        print("Please enter at least 1.")
+while True:
+    speed_weight = read_number("Speed weight: ")
+    torque_weight = read_number("Torque weight: ")
+    cost_weight = read_number("Cost weight: ")
 
+    total_weight = speed_weight + torque_weight + cost_weight
 
+    if min(speed_weight, torque_weight, cost_weight) < 0:
+        print("Weights cannot be negative. Try again.\n")
+    elif total_weight == 0:
+        print("At least one weight must be greater than 0. Try again.\n")
+    else:
+        break
+
+# normalize
+speed_weight /= total_weight
+torque_weight /= total_weight
+cost_weight /= total_weight
+
+print("\nNormalized Weights Applied:")
+print(f" Speed: {round(speed_weight, 2)}")
+print(f" Torque: {round(torque_weight, 2)}")
+print(f" Cost: {round(cost_weight, 2)}\n")
+
+# designs
 designs = []
 amount_of_designs = read_design_count()
 
@@ -119,14 +120,12 @@ for i in range(amount_of_designs):
     torque = user_input("Enter torque rating (1-10): ")
     cost = user_input("Enter cost rating (1-10): ")
 
-    design = Design(name, speed, torque, cost)
-    designs.append(design)
+    designs.append(Design(name, speed, torque, cost))
 
-
+# results
 if amount_of_designs == 1:
     print("\nDesign Evaluation")
     designs[0].display()
-
 else:
     designs.sort(key=lambda d: d.score, reverse=True)
 
