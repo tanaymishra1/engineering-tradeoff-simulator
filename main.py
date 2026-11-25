@@ -51,6 +51,13 @@ def read_weights():
     }
 
 
+def score_range(weights):
+    best = 10 * weights["speed"] + 10 * weights["torque"] - 1 * weights["cost"]
+    # includes penalty
+    worst = 1 * weights["speed"] + 1 * weights["torque"] - 10 * weights["cost"] - 1
+    return best, worst
+
+
 class Design:
     def __init__(self, name, speed, torque, cost, weights):
         self.name = name
@@ -67,7 +74,7 @@ class Design:
         self.find_design_focus()
 
     def calculate_score(self):
-        self.score = (
+        raw = (
             self.speed * self.weights["speed"] +
             self.torque * self.weights["torque"] -
             self.cost * self.weights["cost"]
@@ -75,14 +82,18 @@ class Design:
 
         # torque penalty
         if self.torque < 5:
-            self.score -= 1
+            raw -= 1
+
+        # scale 0-100
+        best, worst = score_range(self.weights)
+        self.score = (raw - worst) / (best - worst) * 100
 
     def evaluate_tradeoff(self):
         if self.torque < 5:
             self.evaluation = "Fails minimum torque constraint."
-        elif self.score >= 6:
+        elif self.score >= 75:
             self.evaluation = "Well-balanced trade-off."
-        elif self.score >= 4:
+        elif self.score >= 50:
             self.evaluation = "Acceptable trade-off, but with limitations."
         else:
             self.evaluation = "Not optimal trade-off."
@@ -99,7 +110,7 @@ class Design:
 
     def display(self):
         print(f"Design: {self.name}")
-        print(f" Score: {round(self.score, 2)}")
+        print(f" Score: {round(self.score, 1)} / 100")
         print(f" Evaluation: {self.evaluation}")
         print(f" Design Focus: {self.focus}\n")
 
@@ -152,9 +163,9 @@ def main():
 
         scores = [d.score for d in designs]
         print("Summary Analysis:")
-        print(f" Highest Score: {round(max(scores), 2)}")
-        print(f" Average Score: {round(sum(scores) / len(scores), 2)}")
-        print(f" Score Range: {round(max(scores) - min(scores), 2)}")
+        print(f" Highest Score: {round(max(scores), 1)}")
+        print(f" Average Score: {round(sum(scores) / len(scores), 1)}")
+        print(f" Score Range: {round(max(scores) - min(scores), 1)}")
 
 
 if __name__ == "__main__":
