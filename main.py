@@ -58,6 +58,14 @@ def score_range(weights):
     return best, worst
 
 
+def ordinal(n):
+    # 11th-13th
+    if 11 <= n % 100 <= 13:
+        return f"{n}th"
+    suffix = {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+    return f"{n}{suffix}"
+
+
 class Design:
     def __init__(self, name, speed, torque, cost, weights):
         self.name = name
@@ -150,15 +158,7 @@ def main():
 
         print("\nDesign Rankings:")
         for i, design in enumerate(designs, start=1):
-            suffix = "th"
-            if i == 1:
-                suffix = "st"
-            elif i == 2:
-                suffix = "nd"
-            elif i == 3:
-                suffix = "rd"
-
-            print(f"{i}{suffix} Place:")
+            print(f"{ordinal(i)} Place:")
             design.display()
 
         scores = [d.score for d in designs]
