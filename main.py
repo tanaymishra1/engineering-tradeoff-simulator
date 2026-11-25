@@ -26,12 +26,38 @@ def read_design_count():
         print("Please enter at least 1.")
 
 
+def read_weights():
+    print("Enter weighting factors for the evaluation (does not need to add to 1):")
+
+    while True:
+        speed_weight = read_number("Speed weight: ")
+        torque_weight = read_number("Torque weight: ")
+        cost_weight = read_number("Cost weight: ")
+
+        total_weight = speed_weight + torque_weight + cost_weight
+
+        if min(speed_weight, torque_weight, cost_weight) < 0:
+            print("Weights cannot be negative. Try again.\n")
+        elif total_weight == 0:
+            print("At least one weight must be greater than 0. Try again.\n")
+        else:
+            break
+
+    # normalize
+    return {
+        "speed": speed_weight / total_weight,
+        "torque": torque_weight / total_weight,
+        "cost": cost_weight / total_weight,
+    }
+
+
 class Design:
-    def __init__(self, name, speed, torque, cost):
+    def __init__(self, name, speed, torque, cost, weights):
         self.name = name
         self.speed = speed
         self.torque = torque
         self.cost = cost
+        self.weights = weights
         self.score = 0
         self.evaluation = ""
         self.focus = ""
@@ -42,9 +68,9 @@ class Design:
 
     def calculate_score(self):
         self.score = (
-            self.speed * speed_weight +
-            self.torque * torque_weight -
-            self.cost * cost_weight
+            self.speed * self.weights["speed"] +
+            self.torque * self.weights["torque"] -
+            self.cost * self.weights["cost"]
         )
 
         # torque penalty
@@ -78,72 +104,58 @@ class Design:
         print(f" Design Focus: {self.focus}\n")
 
 
-print("Engineering Trade-Off Simulator")
-print("This tool evaluates design choices using simplified engineering assumptions\n")
+def main():
+    print("Engineering Trade-Off Simulator")
+    print("This tool evaluates design choices using simplified engineering assumptions\n")
 
-# weights
-print("Enter weighting factors for the evaluation (does not need to add to 1):")
+    # weights
+    weights = read_weights()
 
-while True:
-    speed_weight = read_number("Speed weight: ")
-    torque_weight = read_number("Torque weight: ")
-    cost_weight = read_number("Cost weight: ")
+    print("\nNormalized Weights Applied:")
+    print(f" Speed: {round(weights['speed'], 2)}")
+    print(f" Torque: {round(weights['torque'], 2)}")
+    print(f" Cost: {round(weights['cost'], 2)}\n")
 
-    total_weight = speed_weight + torque_weight + cost_weight
+    # designs
+    designs = []
+    amount_of_designs = read_design_count()
 
-    if min(speed_weight, torque_weight, cost_weight) < 0:
-        print("Weights cannot be negative. Try again.\n")
-    elif total_weight == 0:
-        print("At least one weight must be greater than 0. Try again.\n")
+    for i in range(amount_of_designs):
+        print(f"\nDesign {i + 1}")
+        name = input("Enter design name: ")
+
+        speed = user_input("Enter speed rating (1-10): ")
+        torque = user_input("Enter torque rating (1-10): ")
+        cost = user_input("Enter cost rating (1-10): ")
+
+        designs.append(Design(name, speed, torque, cost, weights))
+
+    # results
+    if amount_of_designs == 1:
+        print("\nDesign Evaluation")
+        designs[0].display()
     else:
-        break
+        designs.sort(key=lambda d: d.score, reverse=True)
 
-# normalize
-speed_weight /= total_weight
-torque_weight /= total_weight
-cost_weight /= total_weight
+        print("\nDesign Rankings:")
+        for i, design in enumerate(designs, start=1):
+            suffix = "th"
+            if i == 1:
+                suffix = "st"
+            elif i == 2:
+                suffix = "nd"
+            elif i == 3:
+                suffix = "rd"
 
-print("\nNormalized Weights Applied:")
-print(f" Speed: {round(speed_weight, 2)}")
-print(f" Torque: {round(torque_weight, 2)}")
-print(f" Cost: {round(cost_weight, 2)}\n")
+            print(f"{i}{suffix} Place:")
+            design.display()
 
-# designs
-designs = []
-amount_of_designs = read_design_count()
+        scores = [d.score for d in designs]
+        print("Summary Analysis:")
+        print(f" Highest Score: {round(max(scores), 2)}")
+        print(f" Average Score: {round(sum(scores) / len(scores), 2)}")
+        print(f" Score Range: {round(max(scores) - min(scores), 2)}")
 
-for i in range(amount_of_designs):
-    print(f"\nDesign {i + 1}")
-    name = input("Enter design name: ")
 
-    speed = user_input("Enter speed rating (1-10): ")
-    torque = user_input("Enter torque rating (1-10): ")
-    cost = user_input("Enter cost rating (1-10): ")
-
-    designs.append(Design(name, speed, torque, cost))
-
-# results
-if amount_of_designs == 1:
-    print("\nDesign Evaluation")
-    designs[0].display()
-else:
-    designs.sort(key=lambda d: d.score, reverse=True)
-
-    print("\nDesign Rankings:")
-    for i, design in enumerate(designs, start=1):
-        suffix = "th"
-        if i == 1:
-            suffix = "st"
-        elif i == 2:
-            suffix = "nd"
-        elif i == 3:
-            suffix = "rd"
-
-        print(f"{i}{suffix} Place:")
-        design.display()
-
-    scores = [d.score for d in designs]
-    print("Summary Analysis:")
-    print(f" Highest Score: {round(max(scores), 2)}")
-    print(f" Average Score: {round(sum(scores) / len(scores), 2)}")
-    print(f" Score Range: {round(max(scores) - min(scores), 2)}")
+if __name__ == "__main__":
+    main()
