@@ -1,3 +1,16 @@
+# rating limits
+LOW = 1
+HIGH = 10
+
+# torque rule
+MIN_TORQUE = 5
+TORQUE_PENALTY = 1
+
+# score cutoffs
+WELL_BALANCED = 75
+ACCEPTABLE = 50
+
+
 def read_number(prompt):
     while True:
         try:
@@ -9,9 +22,9 @@ def read_number(prompt):
 def user_input(prompt):
     while True:
         value = read_number(prompt)
-        if 1 <= value <= 10:
+        if LOW <= value <= HIGH:
             return value
-        print("Please enter a value between 1 and 10.")
+        print(f"Please enter a value between {LOW} and {HIGH}.")
 
 
 def read_design_count():
@@ -52,9 +65,18 @@ def read_weights():
 
 
 def score_range(weights):
-    best = 10 * weights["speed"] + 10 * weights["torque"] - 1 * weights["cost"]
+    best = (
+        HIGH * weights["speed"] +
+        HIGH * weights["torque"] -
+        LOW * weights["cost"]
+    )
     # includes penalty
-    worst = 1 * weights["speed"] + 1 * weights["torque"] - 10 * weights["cost"] - 1
+    worst = (
+        LOW * weights["speed"] +
+        LOW * weights["torque"] -
+        HIGH * weights["cost"] -
+        TORQUE_PENALTY
+    )
     return best, worst
 
 
@@ -89,19 +111,19 @@ class Design:
         )
 
         # torque penalty
-        if self.torque < 5:
-            raw -= 1
+        if self.torque < MIN_TORQUE:
+            raw -= TORQUE_PENALTY
 
         # scale 0-100
         best, worst = score_range(self.weights)
         self.score = (raw - worst) / (best - worst) * 100
 
     def evaluate_tradeoff(self):
-        if self.torque < 5:
+        if self.torque < MIN_TORQUE:
             self.evaluation = "Fails minimum torque constraint."
-        elif self.score >= 75:
+        elif self.score >= WELL_BALANCED:
             self.evaluation = "Well-balanced trade-off."
-        elif self.score >= 50:
+        elif self.score >= ACCEPTABLE:
             self.evaluation = "Acceptable trade-off, but with limitations."
         else:
             self.evaluation = "Not optimal trade-off."
@@ -143,9 +165,9 @@ def main():
         print(f"\nDesign {i + 1}")
         name = input("Enter design name: ")
 
-        speed = user_input("Enter speed rating (1-10): ")
-        torque = user_input("Enter torque rating (1-10): ")
-        cost = user_input("Enter cost rating (1-10): ")
+        speed = user_input(f"Enter speed rating ({LOW}-{HIGH}): ")
+        torque = user_input(f"Enter torque rating ({LOW}-{HIGH}): ")
+        cost = user_input(f"Enter cost rating ({LOW}-{HIGH}): ")
 
         designs.append(Design(name, speed, torque, cost, weights))
 
