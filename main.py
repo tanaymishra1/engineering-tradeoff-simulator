@@ -145,6 +145,11 @@ class Design:
         print(f" Design Focus: {self.focus}\n")
 
 
+def rank(designs):
+    # passing designs first
+    return sorted(designs, key=lambda d: (d.torque >= MIN_TORQUE, d.score), reverse=True)
+
+
 def main():
     print("Engineering Trade-Off Simulator")
     print("This tool evaluates design choices using simplified engineering assumptions\n")
@@ -176,7 +181,7 @@ def main():
         print("\nDesign Evaluation")
         designs[0].display()
     else:
-        designs.sort(key=lambda d: d.score, reverse=True)
+        designs = rank(designs)
 
         print("\nDesign Rankings:")
         for i, design in enumerate(designs, start=1):
