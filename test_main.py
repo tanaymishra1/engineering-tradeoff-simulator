@@ -1,6 +1,6 @@
 import pytest
 
-from main import Design, ordinal, rank, score_range
+from main import Design, ordinal, rank, read_number, score_range
 
 EQUAL = {"speed": 1 / 3, "torque": 1 / 3, "cost": 1 / 3}
 WEIGHTS = {"speed": 0.4, "torque": 0.4, "cost": 0.2}
@@ -58,3 +58,9 @@ def test_failing_ranks_last():
     passes = Design("B", 5, 9, 7, WEIGHTS)
     assert fails.score == pytest.approx(66)
     assert [d.name for d in rank([fails, passes])] == ["B", "fails"]
+
+
+def test_rejects_nan_and_inf(monkeypatch):
+    answers = iter(["nan", "inf", "-inf", "abc", "2"])
+    monkeypatch.setattr("builtins.input", lambda prompt: next(answers))
+    assert read_number("Weight: ") == 2

@@ -1,3 +1,5 @@
+import math
+
 # rating limits
 LOW = 1
 HIGH = 10
@@ -14,9 +16,15 @@ ACCEPTABLE = 50
 def read_number(prompt):
     while True:
         try:
-            return float(input(prompt))
+            value = float(input(prompt))
         except ValueError:
             print("Please enter a number.")
+            continue
+
+        # no nan/inf
+        if math.isfinite(value):
+            return value
+        print("Please enter a regular number.")
 
 
 def user_input(prompt):
