@@ -16,7 +16,7 @@ Enter a weight for speed, torque and cost (any numbers, like 2, 2, 1), then rate
 
 ## How it works
 
-The weights get scaled so they add up to 1. Each design gets a raw score: speed and torque times their weights, minus cost times its weight. If torque is under 5, the design loses a point and fails the torque check.
+The weights get scaled so they add up to 1. Each design gets a raw score: speed and torque times their weights, minus cost times its weight. If torque is under 5, the design loses a point and fails the torque check. When the designs get ranked, any design that fails the torque check goes below every design that passes, even if its score is higher.
 
 The raw score then becomes a score out of 100. 0 is the worst design possible with your weights (speed 1, torque 1, cost 10) and 100 is the best (10, 10, 1). 75 or more counts as well-balanced and 50 or more as acceptable.
 
@@ -31,7 +31,7 @@ pip install -r requirements.txt
 pytest
 ```
 
-The tests check the scoring, the torque rule, the design focus and the place names (1st, 2nd, 11th, 21st and so on). GitHub runs them on every push.
+The tests check the scoring, the torque rule, the ranking, the design focus, the place names (1st, 2nd, 11th, 21st and so on) and that inputs like "nan" get rejected. GitHub runs them on every push.
 
 ## What I learned
 
